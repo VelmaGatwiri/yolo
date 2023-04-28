@@ -12,5 +12,5 @@
 # SIZE REDUCTION
 - Created the client and backend dockerfiles based on the node alpine image. I used node because the languages used ae react and node and I used Alpine to reduce image size.
 - Used .dockerignore file to prevent running of unnecessary files.
-- Reduced the number of layers required to build the image to the least possible amount.
+- Reduced the number of layers required to the least possible steps.
 - Used NPM ci instead of npm install and put the environemt as production.
