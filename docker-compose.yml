@@ -11,6 +11,7 @@ services:
 
   backend:
     build: ./backend
+    image: yolo-backend:v0.01
     ports: 
       - 5000:5000
     environment:
@@ -22,6 +23,7 @@ services:
   
   client:
     build: ./client
+    image: yolo-client:v0.01
     tty: true
     ports: 
       - 3000:3000
