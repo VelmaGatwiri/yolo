@@ -1,5 +1,4 @@
-#Git clone variables
-#git repo
+#Git 
 repository: "hhttps://github.com/VelmaGatwiri/yolo"
 #branch
 yoloVersion: "master"
