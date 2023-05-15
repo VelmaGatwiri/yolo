@@ -1,0 +1,7 @@
+#Git clone variables
+#git repo
+repository: "hhttps://github.com/VelmaGatwiri/yolo"
+#branch
+yoloVersion: "master"
+#repo destination
+dest: "/home/velma/yolo" 
