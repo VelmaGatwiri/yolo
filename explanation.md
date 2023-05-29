@@ -1,16 +1,198 @@
-- Used NPM ci to install dependencies and used CMD NPM to start the application
-- Created a docker-compose.yml file where I connected the database to the backend.
-- The backend depends on the mongoDB and the frontend is dependent on the backend
-- Client is running on port 3000 and the backend on 5000.
-- I used volumes to ensure that the database persists.
-- Tagged the images to display v0.1
+# 1. CREATING YOLO MICRO-SERVICE USING DOCKER COMPOSE
+bThe aim of this project is to containerize the yolo application and run it through docker compose. The image built will then be uploaded to docker hub.
+## Prerequisites
+- Npm
+```bash
+$ npm install npm@latest -g
 
-# ERRORS
-- Some of the errors experienced was the client side not staying active after creation. To mitigate that I set tty to TRUE.
-- Another error was on the port allocation. I had set backend to listen on 8080 which was used by Jenkins so it was not working.
+```
+- Docker Compose (Installed using _Curl_.)
+```bash
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 
-# SIZE REDUCTION
-- Created the client and backend dockerfiles based on the node alpine image. I used node because the languages used ae react and node and I used Alpine to reduce image size.
-- Used .dockerignore file to prevent running of unnecessary files.
-- Reduced the number of layers required to the least possible steps.
-- Used NPM ci instead of npm install and put the environemt as production.
+```
+Test the installation.
+```bash
+$ docker-compose --version
+```
+- Docker hub Account.
+## Installation
+- To install MongoDB locally, use the link [MongoDB](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/).  
+Ensure the MongoDB server is running:
+
+```bash
+$ sudo service mongod start 
+```
+
+- To install [Node](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04) locally follow the link's guidelines.
+
+## Steps
+- Import the node base image.
+```bash
+FROM node:14-alpine
+```
+- Install Dependencies using `npm ci` to install the dependencies in production mode.
+- Start the node server.
+```bash
+CMD ["npm", "start"]
+```
+- Create the `docker-compose.yml` file which contains volumes to allow the container to persist and implemented a network for communication between containers.  
+```yml
+#docker-compose.yml
+version: '3.9'
+services:
+  mongodb:
+    container_name: db_container
+    image: mongo:latest
+    restart: always
+    ports:
+      - 2717:27017
+    volumes: 
+      - mongodb:/data/db
+
+  backend:
+    build: ./backend
+    image: yolo-backend:v0.01
+    ports: 
+      - 5000:5000
+    environment:
+      PORT: 5000
+      MONGODB_URI: mongodb://db_container:27017
+      DB_NAME: yolomy
+    depends_on: 
+      - mongodb 
+  
+  client:
+    build: ./client
+    image: yolo-client:v0.01
+    tty: true
+    ports: 
+      - 3000:3000
+    environment:
+      PORT: 3000
+    depends_on:
+      - backend
+
+volumes:
+  mongodb: {}
+```
+- To dockerize the application both backend and frontend images run:
+```bash
+$ sudo docker compose up
+```
+### Pushing Image to Docker Hub
+- Login to your Docker hub account
+```bash
+$ sudo docker login
+```
+- Build and tag the image
+```bash
+$ sudo docker build -t <Dockerhub_Username>/<image_name>:<tag_name> .
+```
+  &nbsp;
+# 2. CONFIGURATION MANAGEMENT OF THE YOLO PROJECT USING ANSIBLE-PLAYBOOKS
+In this project, we will set up an automated Ansible configuration playbook that automates variable implementation, creation of roles, allocates blocks and tags on a Vagrant provisioned server.
+## Prerequisites
+- Pip
+```bash
+$ python3 -m pip -V
+```
+- Ansible
+- Ansible play-books
+- Vagrant
+## Installation
+- Ansible 
+```bash
+$ python3 -m pip install --user ansible
+```
+Test the installation
+```bash
+$ ansible --version
+```
+- Vagrant 
+```bash
+$ wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+```
+```bash
+$ echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" |
+```
+
+```bash
+$ sudo tee /etc/apt/sources.list.d/hashicorp.list
+```
+```bash
+$ sudo apt update && sudo apt install vagrant
+```
+## Configuration Steps
+1. Create a **Vagrant File** in the project root directory.
+```bash
+$ touch Vagrantfile
+```
+2. Run the `Vagrant up` command to create and configure the virtual machine as specified in the **Vagrantfile** created.  
+Create the **vagrant playbook** which will contain the project's main play.
+```bash
+$ touch playbook.yml
+```
+3. Populate the `playbook.yml` file with information that will allow SSH to configure the server as per the required specifications such as playbook name and tasks to undertake such as _Installing git_ to allow running of the _'git clone'_ command.  
+4. Create  a `vars.yml` file specified in the playbook.yml file 
+```yml
+#vars.yml
+#Git
+repository: "https://github.com/VelmaGatwiri/yolo"
+#branch
+yoloVersion: "master"
+#repo destination
+dest: "/home/velma/yolo" 
+```
+5. Create **roles** folder that will let us to automatically load related vars, files, tasks etc and reuse the created roles dynamically throughout the project. The roles contained in that folder are:
+`docker`, `docker-compose` and `git`
+```bash
+$ ansible-galaxy init <roleName>
+```
+6. Edit the roles created in the `main.yml` file with their respective tasks.
+```yml
+#docker role
+
+---
+# tasks file for docker
+- name: install prerequisites
+  apt:
+   name:
+     - docker.io
+   update_cache: yes
+   
+  # Installs Docker SDK
+- name: install python package manager
+  apt:
+   name: python3-pip
+- name: install python sdk
+  pip:
+    name:
+      - docker
+      - docker-compose
+```
+7. To output a valid configuration for an SSH config file to SSH into the running Vagrant machine run:
+```bash
+$ vagrant ssh-config
+```
+8. Create the ansible required files:   
+    a).`ansible.cfg` - Informs Ansible about our test server.  
+    b).`hosts` -  Defines the server on which to access the project
+9. Provision the vagrant server by running:
+```bash
+$ vagrant provision
+```
+&nbsp;
+# 3. DEPLOYING THE DOCKERIZED CONTAINER TO KUBERNETES USING GOOGLE CLOUD
+## Prerequisites
+- Google Cloud
+- Kubernetes
+- Docker
+## Installation
+- Install [Google CLoud CLI](https://cloud.google.com/sdk/docs/install#deb) 
+- Install Kubectl
+```bash
+$ sudo snap install kubectl --classic
+```
+## Configuration Steps
+1. 
