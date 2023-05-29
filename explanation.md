@@ -26,7 +26,12 @@ $ sudo service mongod start
 
 - To install [Node](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04) locally follow the link's guidelines.
 
-## Steps
+## Layering the Docker File
+- Create a client and backend Docker File.
+ ```bash
+# Client DockerFile
+$ touch DockerFile
+```
 - Import the node base image.
 ```bash
 FROM node:14-alpine
@@ -76,17 +81,19 @@ services:
 volumes:
   mongodb: {}
 ```
-- To dockerize the application both backend and frontend images run:
+- To dockerize the application both backend and client images run:
 ```bash
 $ sudo docker compose up
 ```
-### Pushing Image to Docker Hub
+- Test whether the website is running by clicking on `https://localhost:3000`
+### Pushing Docker Images to Docker Hub
 - Login to your Docker hub account
 ```bash
 $ sudo docker login
 ```
-- Build and tag the image
+- Build and tag the client image
 ```bash
+# Client Image
 $ sudo docker build -t <Dockerhub_Username>/<image_name>:<tag_name> .
 ```
   &nbsp;
@@ -128,7 +135,7 @@ $ sudo apt update && sudo apt install vagrant
 ```bash
 $ touch Vagrantfile
 ```
-2. Run the `Vagrant up` command to create and configure the virtual machine as specified in the **Vagrantfile** created.  
+2. Run the `Vagrant up` command to create and configure the virtual machine with the specifications in the **Vagrantfile** created.  
 Create the **vagrant playbook** which will contain the project's main play.
 ```bash
 $ touch playbook.yml
@@ -154,14 +161,14 @@ $ ansible-galaxy init <roleName>
 #docker role
 
 ---
-# tasks file for docker
+# tasks file
 - name: install prerequisites
   apt:
    name:
      - docker.io
    update_cache: yes
    
-  # Installs Docker SDK
+  # Install Docker SDK
 - name: install python package manager
   apt:
    name: python3-pip
@@ -188,7 +195,6 @@ $ vagrant provision
 - Google Cloud
 - Kubernetes
 - Docker
-- 
 ## Installation
 - Install [Google CLoud CLI](https://cloud.google.com/sdk/docs/install#deb) 
 - Install Kubectl
@@ -197,5 +203,4 @@ $ sudo snap install kubectl --classic
 ```
 - Install [gke-gcloud-auth-plugin](https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke). This allows connection to the cluster.
 ## Configuration Steps
-1. 
-sudo chown -R $USER /home/msafari/.kube
+1.
