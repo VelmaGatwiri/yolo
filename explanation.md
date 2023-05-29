@@ -188,11 +188,14 @@ $ vagrant provision
 - Google Cloud
 - Kubernetes
 - Docker
+- 
 ## Installation
 - Install [Google CLoud CLI](https://cloud.google.com/sdk/docs/install#deb) 
 - Install Kubectl
 ```bash
 $ sudo snap install kubectl --classic
 ```
+- Install [gke-gcloud-auth-plugin](https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke). This allows connection to the cluster.
 ## Configuration Steps
 1. 
+sudo chown -R $USER /home/msafari/.kube
