@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: yolo-backend
-        image: velmagatwiri/yolo:v0.01
+        image: velmagatwiri/yolo:v0.02
         ports:
         - containerPort: 5000
         env:

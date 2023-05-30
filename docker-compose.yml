@@ -6,12 +6,13 @@ services:
     restart: always
     ports:
       - 2717:27017
-    volumes: 
-      - mongodb:/data/db
+    networks:
+      - yolo-service
+    volumes:
+      - yolo-volumes:/etc/mongodb/data
 
   backend:
-    build: ./backend
-    image: yolo-backend:v0.01
+    image: velmagatwiri/yolo:v0.02
     ports: 
       - 5000:5000
     environment:
@@ -20,10 +21,11 @@ services:
       DB_NAME: yolomy
     depends_on: 
       - mongodb 
+    networks:
+      - yolo-service
   
   client:
-    build: ./client
-    image: yolo-client:v0.01
+    image: velmagatwiri/yolo-client:v0.01
     tty: true
     ports: 
       - 3000:3000
@@ -31,6 +33,11 @@ services:
       PORT: 3000
     depends_on:
       - backend
+    networks:
+      - yolo-service
 
+networks:
+  yolo-service:
+    driver: bridge
 volumes:
-  mongodb: {}
+  yolo-volumes:
