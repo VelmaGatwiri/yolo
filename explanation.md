@@ -94,7 +94,12 @@ $ sudo docker login
 - Build and tag the client image
 ```bash
 # Client Image
-$ sudo docker build -t <Dockerhub_Username>/<image_name>:<tag_name> .
+$ sudo docker build . -t <Dockerhub_Username/image_name:tag_name> 
+```
+- Push the image to docker hub account
+```bash
+# Client Image
+$ sudo docker push <Dockerhub_Username/image_name:tag_name>
 ```
   &nbsp;
 # 2. CONFIGURATION MANAGEMENT OF THE YOLO PROJECT USING ANSIBLE-PLAYBOOKS
@@ -202,9 +207,10 @@ $ vagrant provision
 $ sudo snap install kubectl --classic
 ```
 - Install [gke-gcloud-auth-plugin](https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke). This allows connection to the cluster.
+---
 ## Configuration Steps
 ### Local Project Directory
-1. Create the `configmap` file which contains all the external configurations of the application. It is connected to the pod. It contains the service name which acts as the Mongo-Db endpoint
+1. Create the `configmap` file which contains all the external configurations of the application. It is connected to the pod. It contains the service name which acts as the Mongo DB endpoint
 ```bash
 $ touch mongo-config.yml
 ```
@@ -237,3 +243,75 @@ To encode the `mongo-user` and `mongo-password` to base64 run:
 $ echo -n mongouser | base 64
 ```
 3. Create `mongo.yml` file that contains the deployment and service configurations that points the pods on which files to use.
+```bash
+$ touch mongo.yml
+```
+4. Create `backend.yml` and `client.yml` files that contain the configurations to be used in creating the pod.
+```bash
+$ touch client.yml
+```
+```yml
+#client.yml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: yolo-client-deployment
+  labels:
+    app: yolo-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: yolo-client
+  template:
+    metadata:
+      labels:
+        app: yolo-client
+    spec:
+      containers:
+      - name: yolo-client
+        image: velmagatwiri/yolo-client:v0.03
+
+        ports:
+        - containerPort: 3000
+        env:
+        - name: yolo-backend
+          value: http://yolo-backend:5000/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: yolo-client-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: yolo-client
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+```
+5. Commit the changes and push them to the project's github repository.  
+---
+### Google Kubernetes Engine
+1. Log into to the google account.
+2. In the google shell, change directory to project's directory i.e **yolo** pull the project to the cloud shell.
+3. Create a Kubernetes Cluster.
+```bash
+$ gcloud container clusters create-auto <clusterName>\
+  --region <regionName>
+```
+4. Create a manifest directory and build the k8s files to deploy the resource to the cluster
+```bash
+$ kubectl apply -f mongo-config.yml
+$ kubectl apply -f mongo-secret.yml
+$ kubectl apply -f mongo.yml
+$ kubectl apply -f backend.yml
+$ kubectl apply -f client.yml
+```
+### _**Note**_
+- Replace the client external IP address in the client package.json file.
+```bash
+"proxy": "http://34.121.155.147:5000",
+```
+- Replace the backend external IP address in the components/ProductControl.s file.

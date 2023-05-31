@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: yolo-client
-        image: velmagatwiri/yolo-client:v0.03
+        image: velmagatwiri/yolo-client:v0.04
 
         ports:
         - containerPort: 3000
