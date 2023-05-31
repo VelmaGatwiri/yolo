@@ -294,14 +294,17 @@ spec:
 5. Commit the changes and push them to the project's github repository.  
 ---
 ### Google Kubernetes Engine
-1. Log into to the google account.
-2. In the google shell, change directory to project's directory i.e **yolo** pull the project to the cloud shell.
+1. Log into the google account.
+2. In the google shell, change directory to root directory pull the project to the cloud shell.
+```bash
+$ git pull origin master 
+```
 3. Create a Kubernetes Cluster.
 ```bash
 $ gcloud container clusters create-auto <clusterName>\
   --region <regionName>
 ```
-4. Create a manifest directory and build the k8s files to deploy the resource to the cluster
+4. Create a manifest directory and build the k8s files to deploy the resources to the cluster.
 ```bash
 $ kubectl apply -f mongo-config.yml
 $ kubectl apply -f mongo-secret.yml
