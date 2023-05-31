@@ -203,4 +203,37 @@ $ sudo snap install kubectl --classic
 ```
 - Install [gke-gcloud-auth-plugin](https://cloud.google.com/blog/products/containers-kubernetes/kubectl-auth-changes-in-gke). This allows connection to the cluster.
 ## Configuration Steps
-1.
+### Local Project Directory
+1. Create the `configmap` file which contains all the external configurations of the application. It is connected to the pod. It contains the service name which acts as the Mongo-Db endpoint
+```bash
+$ touch mongo-config.yml
+```
+```yml
+# mongo-config.yml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-config
+data:
+  mongo-url: mongo-service
+```
+2. Create the `secret` file that stores and encodes credentials such as password Base64 format. 
+```bash
+$ touch mongo-secret.yml
+```
+```yml
+# mongo-secret.yml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+type: Opaque 
+data:
+  mongo-user: dmVsbWE=
+  mongo-password: dmVsbWExMjM=
+```
+To encode the `mongo-user` and `mongo-password` to base64 run:
+```bash
+$ echo -n mongouser | base 64
+```
+3. Create `mongo.yml` file that contains the deployment and service configurations that points the pods on which files to use.

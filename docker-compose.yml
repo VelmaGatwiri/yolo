@@ -25,7 +25,7 @@ services:
       - yolo-service
   
   client:
-    image: velmagatwiri/yolo-client:v0.01
+    image: velmagatwiri/yolo-client:v0.02
     tty: true
     ports: 
       - 3000:3000
